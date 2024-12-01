@@ -1,7 +1,13 @@
-import { BaseCL } from "@dogsvr/dogsvr/main_thread";
+import { BaseCL, AuthFuncType } from "@dogsvr/dogsvr/main_thread";
 import * as path from "path";
 import { WsServer } from "tsrpc";
 import { serviceProto } from "./shared/protocols/serviceProto";
+
+declare module 'tsrpc' {
+    export interface BaseServer {
+        authFunc: AuthFuncType;
+    }
+}
 
 export class TsrpcCL extends BaseCL {
     server: WsServer;
@@ -16,5 +22,9 @@ export class TsrpcCL extends BaseCL {
     async startListen() {
         await this.server.autoImplementApi(path.resolve(__dirname, 'api'));
         await this.server.start();
+    }
+
+    setAuthFunc(authFunc: AuthFuncType): void {
+        this.server.authFunc = authFunc;
     }
 }

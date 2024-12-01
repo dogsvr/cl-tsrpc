@@ -1,5 +1,5 @@
 import { ApiCall } from 'tsrpc';
-import { Msg, sendMsgToWorkerThread, getConnLayer, traceLog, debugLog, infoLog, warnLog, errorLog } from '@dogsvr/dogsvr/main_thread';
+import { Msg, sendMsgToWorkerThread, traceLog, debugLog, infoLog, warnLog, errorLog } from '@dogsvr/dogsvr/main_thread';
 import { ReqCommon, ResCommon } from '../shared/protocols/PtlCommon';
 
 enum AuthStatus {
@@ -18,7 +18,7 @@ export async function ApiCommon(call: ApiCall<ReqCommon, ResCommon>) {
     let reqMsg = new Msg(call.req.cmdId, 0, call.req.innerReq);
     debugLog('auth status', call.conn.id, call.conn.dogAuthStatus);
     if (!call.conn.dogAuthStatus) {
-        let authFunc = getConnLayer().authFunc;
+        let authFunc = call.conn.server.authFunc;
         if (authFunc) {
             call.conn.dogAuthStatus = AuthStatus.DOING;
             let authRet = await authFunc(reqMsg);
