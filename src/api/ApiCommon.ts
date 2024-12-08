@@ -11,11 +11,13 @@ enum AuthStatus {
 declare module 'tsrpc' {
     export interface BaseConnection {
         dogAuthStatus: AuthStatus;
+        connKey: string;
     }
 }
 
 export async function ApiCommon(call: ApiCall<ReqCommon, ResCommon>) {
-    let reqMsg = new Msg(call.req.cmdId, 0, call.req.innerReq);
+    let reqMsg = new Msg(call.req.head, call.req.innerReq);
+
     debugLog('auth status', call.conn.id, call.conn.dogAuthStatus);
     if (!call.conn.dogAuthStatus) {
         let authFunc = call.conn.server.authFunc;
@@ -39,6 +41,13 @@ export async function ApiCommon(call: ApiCall<ReqCommon, ResCommon>) {
         warnLog('auth status is not passed', call.conn.id, call.conn.dogAuthStatus);
         return;
     }
+
+    if (!call.conn.connKey && call.req.head.openId && call.req.head.zoneId) {
+        call.conn.connKey = call.req.head.openId + "|" + call.req.head.zoneId;
+    }
+
     let resMsg = await sendMsgToWorkerThread(reqMsg);
-    call.succ({ cmdId: resMsg.cmdId, innerRes: resMsg.body });
+    call.succ({
+        head: resMsg.head, innerRes: resMsg.body
+    });
 }

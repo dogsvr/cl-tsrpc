@@ -1,4 +1,5 @@
 import { ServiceProto } from 'tsrpc-proto';
+import { MsgCommon } from './MsgCommon';
 import { ReqCommon, ResCommon } from './PtlCommon';
 
 export interface ServiceType {
@@ -9,7 +10,7 @@ export interface ServiceType {
         }
     },
     msg: {
-
+        "Common": MsgCommon
     }
 }
 
@@ -18,11 +19,51 @@ export const serviceProto: ServiceProto<ServiceType> = {
         {
             "id": 0,
             "name": "Common",
+            "type": "msg"
+        },
+        {
+            "id": 1,
+            "name": "Common",
             "type": "api"
         }
     ],
     "types": {
-        "PtlCommon/ReqCommon": {
+        "MsgCommon/MsgCommon": {
+            "type": "Interface",
+            "properties": [
+                {
+                    "id": 0,
+                    "name": "head",
+                    "type": {
+                        "type": "Reference",
+                        "target": "head/Head"
+                    }
+                },
+                {
+                    "id": 1,
+                    "name": "innerMsg",
+                    "type": {
+                        "type": "Union",
+                        "members": [
+                            {
+                                "id": 0,
+                                "type": {
+                                    "type": "Buffer",
+                                    "arrayType": "Uint8Array"
+                                }
+                            },
+                            {
+                                "id": 1,
+                                "type": {
+                                    "type": "String"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        "head/Head": {
             "type": "Interface",
             "properties": [
                 {
@@ -34,28 +75,51 @@ export const serviceProto: ServiceProto<ServiceType> = {
                 },
                 {
                     "id": 1,
-                    "name": "innerReq",
+                    "name": "openId",
                     "type": {
-                        "type": "Reference",
-                        "target": "../../../node_modules/@dogsvr/dogsvr/message/MsgBodyType"
+                        "type": "String"
+                    }
+                },
+                {
+                    "id": 2,
+                    "name": "zoneId",
+                    "type": {
+                        "type": "Number"
                     }
                 }
             ]
         },
-        "../../../node_modules/@dogsvr/dogsvr/message/MsgBodyType": {
-            "type": "Union",
-            "members": [
+        "PtlCommon/ReqCommon": {
+            "type": "Interface",
+            "properties": [
                 {
                     "id": 0,
+                    "name": "head",
                     "type": {
-                        "type": "Buffer",
-                        "arrayType": "Uint8Array"
+                        "type": "Reference",
+                        "target": "head/Head"
                     }
                 },
                 {
                     "id": 1,
+                    "name": "innerReq",
                     "type": {
-                        "type": "String"
+                        "type": "Union",
+                        "members": [
+                            {
+                                "id": 0,
+                                "type": {
+                                    "type": "Buffer",
+                                    "arrayType": "Uint8Array"
+                                }
+                            },
+                            {
+                                "id": 1,
+                                "type": {
+                                    "type": "String"
+                                }
+                            }
+                        ]
                     }
                 }
             ]
@@ -65,17 +129,32 @@ export const serviceProto: ServiceProto<ServiceType> = {
             "properties": [
                 {
                     "id": 0,
-                    "name": "cmdId",
+                    "name": "head",
                     "type": {
-                        "type": "Number"
+                        "type": "Reference",
+                        "target": "head/Head"
                     }
                 },
                 {
                     "id": 1,
                     "name": "innerRes",
                     "type": {
-                        "type": "Reference",
-                        "target": "../../../node_modules/@dogsvr/dogsvr/message/MsgBodyType"
+                        "type": "Union",
+                        "members": [
+                            {
+                                "id": 0,
+                                "type": {
+                                    "type": "Buffer",
+                                    "arrayType": "Uint8Array"
+                                }
+                            },
+                            {
+                                "id": 1,
+                                "type": {
+                                    "type": "String"
+                                }
+                            }
+                        ]
                     }
                 }
             ]

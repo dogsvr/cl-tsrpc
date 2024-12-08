@@ -1,11 +1,11 @@
-import { MsgBodyType } from '../../../node_modules/@dogsvr/dogsvr/message'
+import { Head } from "./head"
 
 export interface ReqCommon {
-    cmdId: number,
-    innerReq: MsgBodyType
+    head: Head,
+    innerReq: Uint8Array | string
 }
 
 export interface ResCommon {
-    cmdId: number,
-    innerRes: MsgBodyType
+    head: Head,
+    innerRes: Uint8Array | string
 }
