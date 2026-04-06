@@ -37,10 +37,10 @@ export class TsrpcCL extends BaseCL {
 
     async pushMsg(msg: Msg) {
         if (this.svrType === 'ws') {
-            let connKeys = msg.head.clOptions!.connKeys;
+            let gids = msg.head.clOptions!.gids;
             let conns = [];
-            for (let i = 0; i < connKeys.length; ++i) {
-                let conn = (this.server as WsServer).connections.find(v => v.connKey === connKeys[i]);
+            for (let i = 0; i < gids.length; ++i) {
+                let conn = (this.server as WsServer).connections.find(v => v.dogGid === gids[i]);
                 if (conn) {
                     conns.push(conn);
                 }

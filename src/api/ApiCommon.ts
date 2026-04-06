@@ -11,13 +11,22 @@ enum AuthStatus {
 declare module 'tsrpc' {
     export interface BaseConnection {
         dogAuthStatus: AuthStatus;
-        connKey: string;
+        dogOpenId: string;
+        dogZoneId: number;
+        dogGid: number;
     }
 }
 
 export async function ApiCommon(call: ApiCall<ReqCommon, ResCommon>) {
+    // 1. Validate openId and zoneId present in request head
+    if (!call.req.head.openId || !call.req.head.zoneId) {
+        warnLog('missing openId or zoneId in head', call.conn.id);
+        return;
+    }
+
     let reqMsg = new Msg(call.req.head, call.req.innerReq);
 
+    // 2. Auth check
     debugLog('auth status', call.conn.id, call.conn.dogAuthStatus);
     if (!call.conn.dogAuthStatus) {
         let authFunc = call.conn.server.authFunc;
@@ -42,11 +51,32 @@ export async function ApiCommon(call: ApiCall<ReqCommon, ResCommon>) {
         return;
     }
 
-    if (!call.conn.connKey && call.req.head.openId && call.req.head.zoneId) {
-        call.conn.connKey = call.req.head.openId + "|" + call.req.head.zoneId;
+    // 3. Record or validate openId/zoneId
+    if (!call.conn.dogOpenId) {
+        call.conn.dogOpenId = call.req.head.openId!;
+        call.conn.dogZoneId = call.req.head.zoneId!;
+    }
+    else if (call.conn.dogOpenId !== call.req.head.openId || call.conn.dogZoneId !== call.req.head.zoneId) {
+        warnLog('openId or zoneId mismatch', call.conn.id,
+            call.conn.dogOpenId, call.req.head.openId,
+            call.conn.dogZoneId, call.req.head.zoneId);
+        return;
     }
 
+    // 4. If gid recorded, fill into request head
+    if (call.conn.dogGid) {
+        reqMsg.head.gid = call.conn.dogGid;
+    }
+
+    // 5. Send to worker thread
     let resMsg = await sendMsgToWorkerThread(reqMsg);
+
+    // 6. If gid not recorded yet, record from response
+    if (!call.conn.dogGid && resMsg.head.gid) {
+        call.conn.dogGid = resMsg.head.gid;
+    }
+
+    // 7. Return response
     call.succ({
         head: resMsg.head, innerRes: resMsg.body
     });
