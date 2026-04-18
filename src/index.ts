@@ -1,4 +1,4 @@
-import { BaseCL, Msg, errorLog, traceLog } from "@dogsvr/dogsvr/main_thread";
+import { BaseCL, Msg, errorLog, traceLog, registerCLFactory } from "@dogsvr/dogsvr/main_thread";
 import * as path from "path";
 import { WsServer, HttpServer } from "tsrpc";
 import { serviceProto } from "./shared/protocols/serviceProto";
@@ -56,3 +56,6 @@ export class TsrpcCL extends BaseCL {
         }
     }
 }
+
+// Self-register factory when this module is imported
+registerCLFactory('tsrpc', (params) => new TsrpcCL(params.svrType, params.port));
