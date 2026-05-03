@@ -1,7 +1,13 @@
 {
   "name": "@dogsvr/cl-tsrpc",
-  "version": "0.0.4",
-  "description": "",
+  "version": "0.4.0",
+  "description": "TSRPC (WebSocket/HTTP) connection layer for @dogsvr/dogsvr.",
+  "keywords": [
+    "dogsvr",
+    "tsrpc",
+    "websocket",
+    "connection-layer"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -12,11 +18,12 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "LICENSE",
     "README.md"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "protoc": "npx tsrpc proto",
     "build": "rm -rf dist && tsc"
   },
@@ -31,11 +38,12 @@
   },
   "homepage": "https://github.com/dogsvr/cl-tsrpc#readme",
   "dependencies": {
-    "tsrpc": "^3.4.17"
+    "tsrpc": "^3.4.21"
   },
   "devDependencies": {
-    "@dogsvr/dogsvr": "latest",
+    "@dogsvr/dogsvr": "^0.4.0",
+    "@types/node": "^24.12.2",
     "tsrpc-cli": "^2.4.5",
-    "typescript": "^5.6.3"
+    "typescript": "^6.0.3"
   }
 }
