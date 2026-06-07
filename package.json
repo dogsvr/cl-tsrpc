@@ -44,6 +44,9 @@
   "dependencies": {
     "tsrpc": "^3.4.21"
   },
+  "peerDependencies": {
+    "@dogsvr/dogsvr": "^0.4.0"
+  },
   "devDependencies": {
     "@dogsvr/dogsvr": "^0.4.0",
     "@types/node": "^24.12.2",

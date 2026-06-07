@@ -1,6 +1,8 @@
 import { ApiCall } from 'tsrpc';
-import { Msg, sendMsgToWorkerThread, traceLog, debugLog, infoLog, warnLog, errorLog } from '@dogsvr/dogsvr/main_thread';
+import { Msg, sendMsgToWorkerThread, log as rootLog } from '@dogsvr/dogsvr/main_thread';
 import { ReqCommon, ResCommon } from '../shared/protocols/PtlCommon';
+
+const log = rootLog.child({ module: "cl-tsrpc/api/ApiCommon" });
 
 enum AuthStatus {
     PASSED = 1,
@@ -25,14 +27,14 @@ export async function ApiCommon(call: ApiCall<ReqCommon, ResCommon>) {
     //    head's openId/zoneId (as-is, possibly undefined) onto the connection.
     //    Per-head validation (e.g. requiring openId/zoneId) is the business
     //    layer's responsibility and should live inside authFunc.
-    debugLog('auth status', call.conn.id, call.conn.dogAuthStatus);
+    log.debug({ connId: call.conn.id, status: call.conn.dogAuthStatus }, "auth status");
     if (!call.conn.dogAuthStatus) {
         let authFunc = call.conn.server.authFunc;
         if (authFunc) {
             call.conn.dogAuthStatus = AuthStatus.DOING;
             let authRet = await authFunc(reqMsg);
             if (!authRet) {
-                warnLog('auth failed', call.conn.id);
+                log.warn({ connId: call.conn.id }, "auth failed");
                 call.conn.dogAuthStatus = AuthStatus.FAILED;
                 call.conn.close();
                 return;
@@ -40,7 +42,7 @@ export async function ApiCommon(call: ApiCall<ReqCommon, ResCommon>) {
             call.conn.dogAuthStatus = AuthStatus.PASSED;
         }
         else {
-            warnLog('authFunc is not set, so auto passed', call.conn.id);
+            log.warn({ connId: call.conn.id }, "authFunc is not set, so auto passed");
             call.conn.dogAuthStatus = AuthStatus.PASSED;
         }
         // First request passed auth: record head's openId/zoneId as-is.
@@ -48,16 +50,20 @@ export async function ApiCommon(call: ApiCall<ReqCommon, ResCommon>) {
         call.conn.dogZoneId = call.req.head.zoneId;
     }
     else if (call.conn.dogAuthStatus !== AuthStatus.PASSED) {
-        warnLog('auth status is not passed', call.conn.id, call.conn.dogAuthStatus);
+        log.warn({ connId: call.conn.id, status: call.conn.dogAuthStatus }, "auth status is not passed");
         return;
     }
     else {
         // 2. Subsequent requests: head's openId/zoneId must match the snapshot
         //    taken on the first request (undefined matches undefined).
         if (call.conn.dogOpenId !== call.req.head.openId || call.conn.dogZoneId !== call.req.head.zoneId) {
-            warnLog('openId or zoneId mismatch', call.conn.id,
-                call.conn.dogOpenId, call.req.head.openId,
-                call.conn.dogZoneId, call.req.head.zoneId);
+            log.warn({
+                connId: call.conn.id,
+                snapshotOpenId: call.conn.dogOpenId,
+                reqOpenId: call.req.head.openId,
+                snapshotZoneId: call.conn.dogZoneId,
+                reqZoneId: call.req.head.zoneId,
+            }, "openId or zoneId mismatch");
             return;
         }
     }

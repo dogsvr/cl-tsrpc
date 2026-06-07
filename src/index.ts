@@ -1,7 +1,9 @@
-import { BaseCL, Msg, errorLog, traceLog, registerCLFactory } from "@dogsvr/dogsvr/main_thread";
+import { BaseCL, Msg, registerCLFactory, log as rootLog } from "@dogsvr/dogsvr/main_thread";
 import * as path from "path";
 import { WsServer, HttpServer } from "tsrpc";
 import { serviceProto } from "./shared/protocols/serviceProto";
+
+const log = rootLog.child({ module: "cl-tsrpc/index" });
 
 type AuthFuncType = (msg: Msg) => Promise<boolean>;
 declare module 'tsrpc' {
@@ -49,10 +51,10 @@ export class TsrpcCL extends BaseCL {
                 return;
             }
             let ret = await (this.server as WsServer).broadcastMsg("Common", { head: msg.head, innerMsg: msg.body }, conns);
-            traceLog(`broadcastMsg ${msg.head.cmdId} ret:`, ret);
+            log.trace({ cmdId: msg.head.cmdId, ret }, "broadcastMsg");
         }
         else {
-            errorLog(`${this.svrType} server can not push msg`);
+            log.error({ svrType: this.svrType }, "server can not push msg");
         }
     }
 }
