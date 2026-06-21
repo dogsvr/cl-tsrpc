@@ -2,5 +2,7 @@ export interface Head {
     cmdId: number,
     openId?: string,
     zoneId?: number,
-    gid?: number
+    gid?: number,
+    traceparent?: string,
+    tracestate?: string
 }

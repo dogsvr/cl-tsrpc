@@ -96,6 +96,22 @@ export const serviceProto: ServiceProto<ServiceType> = {
                         "type": "Number"
                     },
                     "optional": true
+                },
+                {
+                    "id": 4,
+                    "name": "traceparent",
+                    "type": {
+                        "type": "String"
+                    },
+                    "optional": true
+                },
+                {
+                    "id": 5,
+                    "name": "tracestate",
+                    "type": {
+                        "type": "String"
+                    },
+                    "optional": true
                 }
             ]
         },
